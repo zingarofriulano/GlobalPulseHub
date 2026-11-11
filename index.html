@@ -1,58 +1,342 @@
 <!DOCTYPE html>
-<html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b1020" />
-    <title>GlobalPulse Hub</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="container header-inner">
-        <a class="brand" href="#/" aria-label="GlobalPulse Hub, pagina iniziale">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M3 12h4l2.2-6 4.1 12 2.2-6H21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <span>GlobalPulse <em>Hub</em></span>
-        </a>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobalPulse Hub | Portale Multitasking Globale</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#131c2e',
+                        accentBlue: '#3b82f6',
+                        accentCyan: '#06b6d4',
+                        accentGreen: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen font-sans flex flex-col selection:bg-blue-500 selection:text-white">
 
-        <div class="search-wrap">
-          <label class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/>
-              <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            <input id="global-search" type="search" placeholder="Cerca giochi, libri, veicoli..." autocomplete="off" aria-label="Ricerca globale" />
-          </label>
-          <div id="search-results" class="search-results" role="listbox"></div>
+    <!-- TOP HEADER / REGIONAL & LANGUAGE BAR -->
+    <header class="bg-cardBg/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchCategory('home')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-globe text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">GlobalPulse Hub</h1>
+                    <p class="text-xs text-slate-400">Portale Globale Notizie, Mercati & Community</p>
+                </div>
+            </div>
+
+            <!-- Global Search Bar -->
+            <div class="relative w-full md:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <i class="fa-solid fa-search"></i>
+                </span>
+                <input type="text" id="globalSearch" placeholder="Cerca giochi, veicoli, ricette, notizie..." 
+                    class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition shadow-inner">
+            </div>
+
+            <!-- Region & Language Selectors -->
+            <div class="flex items-center space-x-3 text-sm">
+                <div class="flex items-center space-x-1 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl">
+                    <i class="fa-solid fa-location-dot text-blue-400"></i>
+                    <select id="regionSelect" onchange="updateRegionalContent()" class="bg-transparent text-slate-200 focus:outline-none cursor-pointer">
+                        <option value="it" selected>Italia</option>
+                        <option value="eu">Europa</option>
+                        <option value="us">Stati Uniti</option>
+                        <option value="global">Mondo (Global)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-1 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl">
+                    <i class="fa-solid fa-language text-cyan-400"></i>
+                    <select id="langSelect" class="bg-transparent text-slate-200 focus:outline-none cursor-pointer">
+                        <option value="it" selected>Italiano</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                    </select>
+                </div>
+            </div>
+
         </div>
-
-        <div class="header-actions">
-          <select id="region-select" class="region-select" aria-label="Seleziona area geografica">
-            <option value="Italia">🇮🇹 Italia</option>
-            <option value="Internazionale">🌐 Internazionale</option>
-            <option value="Europa">🇪🇺 Europa</option>
-          </select>
-        </div>
-      </div>
-
-      <nav class="main-nav" aria-label="Navigazione principale">
-        <div id="main-nav" class="container nav-inner"></div>
-      </nav>
     </header>
 
-    <main id="app" class="container" aria-live="polite"></main>
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-slate-900/50 border-b border-slate-800 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 overflow-x-auto">
+            <ul class="flex space-x-2 py-3 whitespace-nowrap scrollbar-none">
+                <li><button onclick="switchCategory('home')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white shadow-md shadow-blue-600/30 transition flex items-center space-x-2"><i class="fa-solid fa-house"></i><span>Home</span></button></li>
+                <li><button onclick="switchCategory('games')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-gamepad"></i><span>Mondo Giochi</span></button></li>
+                <li><button onclick="switchCategory('vehicles')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-car"></i><span>Veicoli & Trattori</span></button></li>
+                <li><button onclick="switchCategory('kitchen')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-utensils"></i><span>Cucina & Ricette</span></button></li>
+                <li><button onclick="switchCategory('books')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-book"></i><span>Libri & Editoria</span></button></li>
+                <li><button onclick="switchCategory('fashion')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-shirt"></i><span>Moda & Stile</span></button></li>
+                <li><button onclick="switchCategory('politics')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-landmark"></i><span>Politica & Appalti</span></button></li>
+                <li><button onclick="switchCategory('jobs')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 transition flex items-center space-x-2"><i class="fa-solid fa-briefcase"></i><span>Lavoro & Carriera</span></button></li>
+            </ul>
+        </div>
+    </nav>
 
-    <footer class="footer">
-      <div class="container footer-inner">
-        <span>© <span id="year"></span> GlobalPulse Hub · Il tuo mondo, in un unico posto.</span>
-        <span>Prototipo dimostrativo · I contenuti del feed sono simulati.</span>
-      </div>
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
+        <div id="mainContainer">
+            <!-- Rendered Dynamically -->
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-cardBg border-t border-slate-800 mt-12 py-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 GlobalPulse Hub. Tutti i diritti riservati. Portale Multitasking Globale.</p>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-blue-400 transition">Termini di Servizio</a>
+                <a href="#" class="hover:text-blue-400 transition">Privacy Policy</a>
+                <a href="#" class="hover:text-blue-400 transition">Contatti & API</a>
+            </div>
+        </div>
     </footer>
 
-    <script src="app.js"></script>
-  </body>
+    <!-- JAVASCRIPT LOGIC & DATA -->
+    <script>
+        let currentCategory = 'home';
+        let currentCommunityTab = 'global';
+
+        const db = {
+            home: {
+                title: "Panoramica Globale & Trend in Tempo Reale",
+                desc: "Benvenuto su GlobalPulse Hub. Monitora le fonti ufficiali, esplora i mercati territoriali selezionati e partecipa alle community globali e locali.",
+                featured: [
+                    { title: "DayZ & Rust Console Server & Modding", category: "Mondo Giochi", source: "Nitrado / Double11", link: "https://nitrado.net", desc: "Aggiornamenti ufficiali e configurazioni multiplayer console." },
+                    { title: "Mercato Trattori, Auto & Veicoli Usati", category: "Veicoli", source: "AutoScout24 / Agriaffaires", link: "https://www.autoscout24.it", desc: "Listini e anteprime annunci filtrati per nazione." },
+                    { title: "Cucina Tradizionale & Ricette dal Mondo", category: "Cucina", source: "GialloZafferano / Michelin", link: "https://www.giallozafferano.it", desc: "Esplora portate e segreti gastronomici ufficiali." }
+                ]
+            },
+            games: {
+                title: "Mondo Giochi: Schede Ufficiali & Notizie",
+                desc: "Sezioni dedicate per ogni singolo titolo videoludico con link ufficiali e feed notizie di settore.",
+                items: [
+                    { name: "DayZ", icon: "fa-skull", officialUrl: "https://dayz.com", newsSource: "DayZ Dev Hub", desc: "Survival hardcore, community server e modding.", market: "Global & ITA" },
+                    { name: "Rust Console Edition", icon: "fa-shield-halved", officialUrl: "https://rust.double11.com", newsSource: "Double11 Portal", desc: "Costruisci, saccheggia e sopravvivi su console.", market: "Global & ITA" },
+                    { name: "Call of Duty Series", icon: "fa-crosshairs", officialUrl: "https://www.callofduty.com", newsSource: "Activision News", desc: "Sparatutto tattico e multiplayer competitivo.", market: "Global & ITA" },
+                    { name: "Dead by Daylight", icon: "fa-ghost", officialUrl: "https://deadbydaylight.com", newsSource: "BHVR Portal", desc: "Action horror multiplayer asimmetrico.", market: "Global & ITA" }
+                ]
+            },
+            vehicles: {
+                title: "Veicoli, Auto, Moto, Camion & Trattori",
+                desc: "Anteprime annunci e mercati globali e locali geolocalizzati in base alla nazione selezionata.",
+                items: [
+                    { type: "Trattori & Macchine Agricole", example: "Parco Trattori Usati & Nuovi", marketITA: "Agriaffaires.it / TrattoriUsati", marketGlobal: "MachineryZone", official: "https://www.agriaffaires.it" },
+                    { type: "Auto & Sportive", example: "Berline, Station & Tuning", marketITA: "AutoScout24.it", marketGlobal: "Mobile.de", official: "https://www.autoscout24.it" },
+                    { type: "Camion & Veicoli Industriali", example: "Trattori Stradali & Cantieristica", marketITA: "TruckScout24.it", marketGlobal: "Truck1", official: "https://www.truckscout24.it" },
+                    { type: "Moto & Due Ruote", example: "Naked, Custom & Enduro", marketITA: "Moto.it", marketGlobal: "CycleTrader", official: "https://www.moto.it" }
+                ]
+            },
+            kitchen: {
+                title: "Cucina Globale & Ricette Tradizionali",
+                desc: "Copertura completa delle cucine del mondo, ricette regionali e portali gastronomici ufficiali.",
+                items: [
+                    { cuisine: "Cucina Italiana", flagship: "Pasta Tradizionale & Ragù", source: "GialloZafferano", link: "https://www.giallozafferano.it" },
+                    { cuisine: "Cucina Peruviana", flagship: "Ceviche & Lomo Saltado", source: "Gastronomía del Perú", link: "https://www.peru.travel" },
+                    { cuisine: "Cucina Asiatica", flagship: "Ramen & Fusion Street Food", source: "Asian Recipe Hub", link: "https://www.justonecookbook.com" },
+                    { cuisine: "Cucina Internazionale", flagship: "Alta Cucina & Guide", source: "Michelin Guide", link: "https://guide.michelin.com" }
+                ]
+            },
+            books: {
+                title: "Libri, Editoria & Self-Publishing",
+                desc: "Romanzi thriller, fantascienza, saggistica e portali di distribuzione ufficiale.",
+                items: [
+                    { title: "COSPIRATION (Thriller Distopico)", author: "Ronny Rossetto", source: "Amazon KDP", link: "https://amazon.dp" },
+                    { title: "Cataloghi Letterari Globali", author: "Best Seller Internazionali", source: "Goodreads", link: "https://www.goodreads.com" }
+                ]
+            },
+            fashion: {
+                title: "Moda & Stile Globale",
+                desc: "Trend di abbigliamento, brand di tendenza e passerelle internazionali.",
+                items: [
+                    { sector: "Streetwear & Urban", source: "Hypebeast", link: "https://hypebeast.com" },
+                    { sector: "Alta Moda Italiana", source: "Vogue Italia", link: "https://www.vogue.it" }
+                ]
+            },
+            politics: {
+                title: "Politica & Appalti Pubblici",
+                desc: "Bandi di gara istituzionali, gazzette ufficiali e trasparenza amministrativa.",
+                items: [
+                    { sector: "Appalti e Gare Italia", source: "ANAC / Gazzetta Ufficiale", link: "https://www.anticorruzione.it" },
+                    { sector: "Politica Internazionale", source: "Politico EU", link: "https://www.politico.eu" }
+                ]
+            },
+            jobs: {
+                title: "Lavoro, Carriera & Remote Staffing",
+                desc: "Offerte di lavoro, recruiting e agenzie di collocamento globali e locali.",
+                items: [
+                    { sector: "Nuove Frontiere Lavoro", source: "Agenzia Partner", link: "#" },
+                    { sector: "Opportunità Globali Remote", source: "LinkedIn Jobs / Indeed", link: "https://www.indeed.com" }
+                ]
+            }
+        };
+
+        function switchCategory(catKey) {
+            currentCategory = catKey;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/30');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+            });
+            event?.currentTarget?.classList?.add('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/30');
+            renderContent();
+        }
+
+        function updateRegionalContent() {
+            renderContent();
+        }
+
+        function filterCommunity(type) {
+            currentCommunityTab = type;
+            document.querySelectorAll('.comm-tab').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event?.currentTarget?.classList?.remove('bg-slate-800', 'text-slate-300');
+            event?.currentTarget?.classList?.add('bg-blue-600', 'text-white');
+            renderCommunityThreads();
+        }
+
+        function renderContent() {
+            const container = document.getElementById('mainContainer');
+            const data = db[currentCategory];
+            const region = document.getElementById('regionSelect').value;
+
+            if (!data) return;
+
+            let html = `
+                <div class="mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">${data.title}</h2>
+                    <p class="text-slate-400 text-sm md:text-base">${data.desc} <span class="text-blue-400 font-semibold">(Area: ${region.toUpperCase()})</span></p>
+                </div>
+            `;
+
+            if (currentCategory === 'home') {
+                html += `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">`;
+                data.featured.forEach(item => {
+                    html += `
+                        <div class="bg-cardBg border border-slate-800 rounded-2xl p-6 hover:border-blue-500 transition shadow-xl">
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${item.category}</span>
+                            <h3 class="text-lg font-bold text-white mt-3 mb-2">${item.title}</h3>
+                            <p class="text-slate-400 text-sm mb-4">${item.desc}</p>
+                            <a href="${item.link}" target="_blank" class="inline-flex items-center space-x-2 text-sm text-cyan-400 hover:text-cyan-300 font-medium">
+                                <span>Fonte: ${item.source}</span>
+                                <i class="fa-solid fa-external-link-alt text-xs"></i>
+                            </a>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else {
+                html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">`;
+                data.items.forEach(item => {
+                    const marketLabel = region === 'it' ? (item.marketITA || item.newsSource || 'Mercato ITA') : (item.marketGlobal || item.source || 'Mercato Global');
+                    html += `
+                        <div class="bg-cardBg border border-slate-800 rounded-2xl p-5 hover:border-blue-500 transition shadow-lg flex flex-col justify-between">
+                            <div>
+                                ${item.icon ? `<div class="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center text-xl mb-4 border border-blue-500/20"><i class="fa-solid ${item.icon}"></i></div>` : ''}
+                                <h3 class="text-lg font-bold text-white mb-1">${item.name || item.type || item.cuisine || item.title || item.sector}</h3>
+                                <p class="text-slate-400 text-xs mb-4">${item.desc || item.example || item.flagship || item.author || ''}</p>
+                            </div>
+                            <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
+                                <span class="text-slate-400 font-medium truncate max-w-[120px]" title="${marketLabel}">${marketLabel}</span>
+                                <a href="${item.officialUrl || item.link || '#'}" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white transition font-semibold">
+                                    Visita <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            // SEZIONE FORUM A DOPPIO LIVELLO + COMMUNITY PROPRIA DEL SITO
+            html += `
+                <div class="mt-12 bg-cardBg border border-slate-800 rounded-2xl p-6 md:p-8">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-comments text-cyan-400"></i>
+                                <span>Spazio Community & Discussioni (${currentCategory.toUpperCase()})</span>
+                            </h3>
+                            <p class="text-xs text-slate-400">Interagisci nella community globale, nella sezione locale italiana o nello spazio esclusivo del nostro portale.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="filterCommunity('global')" class="comm-tab px-3 py-1.5 rounded-lg text-xs font-semibold ${currentCommunityTab === 'global' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'} transition">Community Globale</button>
+                            <button onclick="filterCommunity('local')" class="comm-tab px-3 py-1.5 rounded-lg text-xs font-semibold ${currentCommunityTab === 'local' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'} transition">Community Locale (ITA)</button>
+                            <button onclick="filterCommunity('site')" class="comm-tab px-3 py-1.5 rounded-lg text-xs font-semibold ${currentCommunityTab === 'site' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'} transition">Community Ufficiale Hub</button>
+                        </div>
+                    </div>
+
+                    <div id="forumThreads" class="space-y-4">
+                        <!-- Popolato dinamicamente -->
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            renderCommunityThreads();
+        }
+
+        function renderCommunityThreads() {
+            const threadsContainer = document.getElementById('forumThreads');
+            if (!threadsContainer) return;
+
+            let threadsData = [];
+            if (currentCommunityTab === 'global') {
+                threadsData = [
+                    { title: `[Global] International Trends and Official Updates for ${currentCategory}`, author: "GlobalAdmin", replies: 42, time: "3 ore fa" },
+                    { title: `[Global] Marketplace listings comparison across worldwide regions`, author: "Trader_X", replies: 19, time: "5 ore fa" }
+                ];
+            } else if (currentCommunityTab === 'local') {
+                threadsData = [
+                    { title: `[Italia] Discussioni ufficiali, listini e mercati territoriali italiani`, author: "Utente_ITA", replies: 28, time: "1 ora fa" },
+                    { title: `[Italia] Guide e punti di incontro per la community italiana`, author: "Mod_Roma", replies: 14, time: "4 ore fa" }
+                ];
+            } else {
+                threadsData = [
+                    { title: `[GlobalPulse Hub Exclusive] Annunci ufficiali dello staff e novità del portale`, author: "GlobalPulse_Team", replies: 65, time: "30 min fa" },
+                    { title: `[GlobalPulse Hub Exclusive] Feedback, suggerimenti e richieste nuove sezioni`, author: "Founder_Ronny", replies: 31, time: "2 ore fa" }
+                ];
+            }
+
+            let html = '';
+            threadsData.forEach(t => {
+                html += `
+                    <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">${t.author}</span>
+                            <h4 class="text-sm font-semibold text-slate-200 mt-1">${t.title}</h4>
+                            <p class="text-xs text-slate-500 mt-1">${t.replies} risposte • Pubblicato ${t.time}</p>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-semibold transition">Partecipa</button>
+                    </div>
+                `;
+            });
+            threadsContainer.innerHTML = html;
+        }
+
+        window.onload = function() {
+            switchCategory('home');
+        };
+    </script>
+</body>
 </html>
